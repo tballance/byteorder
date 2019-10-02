@@ -1908,7 +1908,7 @@ macro_rules! write_num_bytes {
         unsafe {
             // N.B. https://github.com/rust-lang/rust/issues/22776
             let bytes = *(&$n.$which() as *const _ as *const [u8; $size]);
-            copy_nonoverlapping((&bytes).as_ptr(), $dst.as_mut_ptr(), $size);
+            copy_nonoverlapping((&bytes).as_ptr(), &mut $dst as *mut _ as *mut u8, $size);
         }
     });
 }
