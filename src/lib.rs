@@ -1887,24 +1887,25 @@ pub type NativeEndian = LittleEndian;
 #[cfg(target_endian = "big")]
 pub type NativeEndian = BigEndian;
 
+// HACK use memcpy instead of core_nonoverlapping
+extern "C" {
+    fn memcpy(dst: *mut u8, src: *const u8, n: usize);
+}
+
 macro_rules! read_num_bytes {
     ($ty:ty, $size:expr, $src:expr, $which:ident) => ({
         assert!($size == ::core::mem::size_of::<$ty>());
         assert!($size <= $src.len());
         let mut data: $ty = 0;
         unsafe {
-            copy_nonoverlapping(
-                $src.as_ptr(),
-                &mut data as *mut $ty as *mut u8,
-                $size);
+            // copy_nonoverlapping(
+            //     $src.as_ptr(),
+            //     &mut data as *mut $ty as *mut u8,
+            //     $size);
+            memcpy(&mut data as *mut _ as *mut u8, $src.as_ptr(), $size);
         }
         data.$which()
     });
-}
-
-// HACK use memcpy instead of core_nonoverlapping
-extern "C" {
-    fn memcpy(dst: *mut u8, src: *const u8, n: usize);
 }
 
 macro_rules! write_num_bytes {
