@@ -1902,13 +1902,19 @@ macro_rules! read_num_bytes {
     });
 }
 
+// HACK use memcpy instead of core_nonoverlapping
+extern "C" {
+    fn memcpy(dst: *mut u8, src: *const u8, n: usize);
+}
+
 macro_rules! write_num_bytes {
     ($ty:ty, $size:expr, $n:expr, $dst:expr, $which:ident) => ({
         assert!($size <= $dst.len());
         unsafe {
             // N.B. https://github.com/rust-lang/rust/issues/22776
             let bytes = *(&$n.$which() as *const _ as *const [u8; $size]);
-            copy_nonoverlapping((&bytes).as_ptr(), &mut $dst as *mut _ as *mut u8, $size);
+            // copy_nonoverlapping((&bytes).as_ptr(), &mut $dst as *mut _ as *mut u8, $size);
+            memcpy($dst.as_mut_ptr(), (&bytes).as_ptr(), $size);
         }
     });
 }
