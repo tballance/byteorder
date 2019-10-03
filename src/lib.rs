@@ -1889,7 +1889,7 @@ pub type NativeEndian = BigEndian;
 
 // HACK use memcpy instead of core_nonoverlapping
 extern "C" {
-    fn memcpy(dst: *mut u8, src: *const u8, n: usize);
+    fn memcpy(dst: *mut u8, src: *const u8, n: usize) -> u32; // return val should be native pointer size, but this causes exceptions for some reason
 }
 
 macro_rules! read_num_bytes {
